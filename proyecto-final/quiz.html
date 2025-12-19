@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartões X - Quiz Premium</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/quiz.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="quiz-bg">
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="https://wihwrtvhqfwliidkvgcn.supabase.co/storage/v1/object/public/IMAGENES/LOGO%203.png" alt="Cartões X">
+                </a>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html"><i class="fas fa-credit-card"></i> <span>Cartões</span></a></li>
+                    <li><a href="#"><i class="fas fa-book"></i> <span>Guias</span></a></li>
+                    <li><a href="#"><i class="fas fa-table"></i> <span>Planilhas</span></a></li>
+                    <li><a href="#"><i class="fas fa-plane"></i> <span>Painel de Voo</span></a></li>
+                    <li><a href="quiz.html" class="active"><i class="fas fa-gamepad"></i> <span>Quiz</span></a></li>
+                </ul>
+            </nav>
+            <button class="mobile-menu-btn" id="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="header-right">
+                <button id="header-login-btn" class="login-btn-header">
+                    <i class="fas fa-sign-in-alt"></i> Entrar
+                </button>
+                <div class="user-dropdown-container" id="header-user-container" style="display: none;">
+                    <button class="user-dropdown-trigger" id="header-user-trigger">
+                        <span class="user-avatar-header" id="header-user-avatar">?</span>
+                        <span class="user-name-display" id="header-user-name">Usuario</span>
+                        <i class="fas fa-chevron-down user-dropdown-arrow"></i>
+                    </button>
+                    <div class="user-dropdown-menu" id="header-user-dropdown">
+                        <div class="user-dropdown-header">
+                            <span class="user-dropdown-email" id="header-user-email">email@example.com</span>
+                            <span class="user-dropdown-role" id="header-user-role">User</span>
+                        </div>
+                        <div class="user-dropdown-divider"></div>
+                        <a href="admin.html" class="user-dropdown-item" id="header-admin-link" style="display: none;">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Admin Panel</span>
+                        </a>
+                        <button class="user-dropdown-item user-dropdown-logout" id="header-logout-btn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Sair da conta</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Login Modal (Supabase Auth - Obligatorio) -->
+    <div class="login-modal" id="login-modal">
+        <div class="login-content">
+            <button class="close-login" id="close-login" style="display: none;">&times;</button>
+            <div class="login-header">
+                <div class="login-icon"><i class="fas fa-user-lock"></i></div>
+                <h2>Entrar no Sistema</h2>
+                <p>Digite suas credenciais para acessar o Quiz</p>
+            </div>
+            <form class="login-form" id="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required placeholder="seu@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Senha</label>
+                    <input type="password" id="login-password" required placeholder="Sua senha">
+                </div>
+                <div id="login-error" class="login-error" style="display: none;"></div>
+                <button type="submit" class="login-btn">Entrar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quiz Container -->
+    <div class="quiz-container">
+        
+        <!-- PANTALLA: Login de Perfil Quiz -->
+        <div class="quiz-screen" id="screen-login">
+            <div class="quiz-card centered">
+                <div class="quiz-card-icon"><i class="fas fa-gamepad"></i></div>
+                <h2>Quiz Cartões X</h2>
+                <p>Entre com seu perfil para jogar</p>
+                <form class="quiz-form" id="form-profile-login">
+                    <div class="form-group">
+                        <label>Nome de Usuário</label>
+                        <input type="text" id="profile-username" placeholder="Seu nome no quiz" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <input type="password" id="profile-password" placeholder="Sua senha" required>
+                    </div>
+                    <button type="submit" class="quiz-btn">
+                        <i class="fas fa-sign-in-alt"></i> Entrar
+                    </button>
+                </form>
+                <a href="#" class="quiz-link" id="link-register">Não tem conta? Criar perfil</a>
+            </div>
+        </div>
+
+        <!-- PANTALLA: Registro de Perfil -->
+        <div class="quiz-screen" id="screen-register">
+            <div class="quiz-card centered">
+                <div class="quiz-card-icon"><i class="fas fa-user-plus"></i></div>
+                <h2>Criar Perfil</h2>
+                <p>Crie seu perfil para salvar seu progresso</p>
+                <form class="quiz-form" id="form-profile-register">
+                    <div class="form-group">
+                        <label>Nome de Usuário</label>
+                        <input type="text" id="register-username" placeholder="Escolha um nome" required minlength="3" maxlength="20">
+                    </div>
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <input type="password" id="register-password" placeholder="Crie uma senha" required minlength="4">
+                    </div>
+                    <button type="submit" class="quiz-btn">
+                        <i class="fas fa-user-plus"></i> Criar Perfil
+                    </button>
+                </form>
+                <a href="#" class="quiz-link" id="link-login">Já tem conta? Entrar</a>
+            </div>
+        </div>
+
+        <!-- PANTALLA: Ranking Principal -->
+        <div class="quiz-screen" id="screen-ranking">
+            <div class="quiz-ranking-layout">
+                <!-- Panel Principal -->
+                <div class="quiz-ranking-main">
+                    <div class="quiz-card">
+                        <div class="quiz-ranking-header">
+                            <h2 class="quiz-ranking-title"><i class="fas fa-trophy"></i> Ranking</h2>
+                            <div class="quiz-filter-btns">
+                                <button class="quiz-filter-btn active" data-filter="global">Global</button>
+                                <button class="quiz-filter-btn" data-filter="weekly">Semanal</button>
+                                <button class="quiz-filter-btn" data-filter="monthly">Mensal</button>
+                            </div>
+                        </div>
+                        <div class="quiz-ranking-list" id="ranking-list"></div>
+                        
+                        <!-- MODOS DE JUEGO -->
+                        <div class="quiz-modes-section">
+                            <h3 style="color: white; margin-bottom: 15px; font-size: 16px;"><i class="fas fa-credit-card"></i> Experiências</h3>
+                            
+                            <!-- CAMPAÑA - Modo Principal -->
+                            <a href="campaign.html" class="quiz-mode-btn campaign">
+                                <div class="mode-icon">✈️</div>
+                                <div class="mode-info">
+                                    <strong>VIP Journey</strong>
+                                    <span>Desbloqueie salas VIP e benefícios exclusivos</span>
+                                </div>
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                            
+                            <!-- PRÁCTICA - Desbloqueado por Campaña -->
+                            <div class="quiz-mode-btn practice" id="btn-practice-mode">
+                                <div class="mode-icon">📖</div>
+                                <div class="mode-info">
+                                    <strong>Estudo Premium</strong>
+                                    <span id="practice-status">Complete desafios para desbloquear</span>
+                                </div>
+                                <i class="fas fa-chevron-right" id="practice-arrow"></i>
+                            </div>
+                            
+                            <!-- Submenu de Práctica (oculto por defecto) -->
+                            <div class="practice-levels" id="practice-levels" style="display: none;">
+                                <div class="practice-level" data-diff="facil" id="practice-facil">
+                                    <span class="level-icon">🎫</span>
+                                    <span class="level-name">Terminal</span>
+                                    <span class="level-status"><i class="fas fa-lock"></i></span>
+                                </div>
+                                <div class="practice-level" data-diff="media" id="practice-media">
+                                    <span class="level-icon">🥂</span>
+                                    <span class="level-name">Lounge VIP</span>
+                                    <span class="level-status"><i class="fas fa-lock"></i></span>
+                                </div>
+                                <div class="practice-level" data-diff="dificil" id="practice-dificil">
+                                    <span class="level-icon">💎</span>
+                                    <span class="level-name">First Class</span>
+                                    <span class="level-status"><i class="fas fa-lock"></i></span>
+                                </div>
+                                <div class="practice-note">
+                                    <i class="fas fa-info-circle"></i>
+                                    Black Card só disponível na VIP Journey
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="quiz-sidebar">
+                    <!-- Widget Perfil -->
+                    <div class="quiz-profile-widget" id="profile-widget"></div>
+                    
+                    <!-- Widget Actividad -->
+                    <div class="quiz-widget" id="activity-widget"></div>
+                    
+                    <!-- Widget Highlights -->
+                    <div class="quiz-widget" id="highlights-widget"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANTALLA: Perfil Completo -->
+        <div class="quiz-screen" id="screen-profile">
+            <div class="quiz-card" style="max-width: 600px; margin: 0 auto;">
+                <div id="profile-full-content">
+                    <!-- Renderizado via JS -->
+                </div>
+                <button class="quiz-btn quiz-btn-secondary" id="btn-back-ranking" style="margin-top: 20px;">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+            </div>
+        </div>
+
+        <!-- PANTALLA: Setup del Juego -->
+        <div class="quiz-screen" id="screen-setup">
+            <div class="quiz-card" style="max-width: 500px; margin: 0 auto;">
+                <div id="setup-content">
+                    <!-- Renderizado via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- PANTALLA: Juego (simplificado) -->
+        <div class="quiz-screen" id="screen-game">
+            <div class="quiz-card">
+                <div id="game-content">
+                    <p style="color: white; text-align: center;">Juego en desarrollo...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANTALLA: Resultados -->
+        <div class="quiz-screen" id="screen-results">
+            <div class="quiz-card centered">
+                <div class="quiz-card-icon"><i class="fas fa-flag-checkered"></i></div>
+                <h2>¡Partida Terminada!</h2>
+                <div id="results-content"></div>
+                <button class="quiz-btn" id="btn-back-home">
+                    <i class="fas fa-home"></i> Volver al Inicio
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts: Módulos Compartidos -->
+    <script src="js/config.js"></script>
+    <script src="js/modules/utils.js"></script>
+    <script src="js/modules/storage.js"></script>
+    <script src="js/modules/auth.js"></script>
+    <script src="js/modules/header.js"></script>
+    
+    <!-- Scripts: Quiz -->
+    <script src="js/quiz/data.js"></script>
+    <script src="js/quiz/rules.js"></script>
+    <script src="js/quiz/init.js"></script>
+    <script src="js/quiz/profile.js"></script>
+    <script src="js/quiz/activity.js"></script>
+    <script src="js/quiz/achievements.js"></script>
+    <script src="js/quiz/ranking.js"></script>
+    <script src="js/quiz/game.js"></script>
+    <script src="js/quiz/ui.js"></script>
+    
+    <script>
+        // ============================================
+        // QUIZ - INICIALIZACIÓN
+        // ============================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('Quiz init...');
+            
+            // 1. Inicializar datos de ejemplo
+            QuizInit.initExampleData();
+            
+            // 2. Inicializar autenticación de Supabase
+            Auth.onAuthChange = (user) => {
+                Header.updateUI(user);
+                
+                const loginModal = document.getElementById('login-modal');
+                const closeLoginBtn = document.getElementById('close-login');
+                
+                if (user) {
+                    // Usuario logueado - ocultar modal y mostrar quiz
+                    loginModal.classList.remove('active');
+                    closeLoginBtn.style.display = 'block';
+                    
+                    // Mostrar pantalla del quiz
+                    QuizUI.checkAndShowScreen();
+                } else {
+                    // No logueado - mostrar modal obligatorio
+                    loginModal.classList.add('active');
+                    closeLoginBtn.style.display = 'none';
+                }
+            };
+            await Auth.init();
+            
+            // Verificar si hay sesión al cargar
+            if (!Auth.isAuthenticated()) {
+                document.getElementById('login-modal').classList.add('active');
+            } else {
+                QuizUI.checkAndShowScreen();
+            }
+            
+            // 3. Inicializar header
+            Header.init();
+            
+            // 4. Vincular eventos
+            bindEvents();
+            
+            // 5. Evento del formulario de login Supabase
+            document.getElementById('login-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                const errorDiv = document.getElementById('login-error');
+                
+                errorDiv.style.display = 'none';
+                
+                const result = await Auth.login(email, password);
+                if (!result.success) {
+                    errorDiv.textContent = result.error || 'Erro ao fazer login';
+                    errorDiv.style.display = 'block';
+                }
+            });
+            
+            // 6. Evento cerrar modal (solo si está logueado)
+            document.getElementById('close-login').addEventListener('click', () => {
+                if (Auth.isAuthenticated()) {
+                    document.getElementById('login-modal').classList.remove('active');
+                }
+            });
+            
+            // 7. Mobile menu
+            const mobileBtn = document.getElementById('mobile-menu-btn');
+            const nav = document.querySelector('nav');
+            if (mobileBtn && nav) {
+                mobileBtn.addEventListener('click', () => nav.classList.toggle('active'));
+            }
+            
+            console.log('Quiz ready!');
+        });
+
+        // ============================================
+        // EVENTOS
+        // ============================================
+        function bindEvents() {
+            // --- Links de navegación ---
+            Utils.$('link-register')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                QuizUI.showScreen('screen-register');
+            });
+            
+            Utils.$('link-login')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                QuizUI.showScreen('screen-login');
+            });
+
+            // --- Formulario Login Perfil ---
+            Utils.$('form-profile-login')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = Utils.$('profile-username')?.value?.trim();
+                const password = Utils.$('profile-password')?.value;
+                
+                if (!username || !password) return;
+                
+                const result = QuizProfile.login(username, password);
+                if (result.success) {
+                    QuizUI.showRankingScreen();
+                } else {
+                    alert(result.error);
+                }
+            });
+
+            // --- Formulario Registro Perfil ---
+            Utils.$('form-profile-register')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = Utils.$('register-username')?.value?.trim();
+                const password = Utils.$('register-password')?.value;
+                
+                if (!username || !password) return;
+                if (username.length < 3) {
+                    alert('Nome deve ter pelo menos 3 caracteres');
+                    return;
+                }
+                
+                const result = QuizProfile.create(username, password);
+                if (result.success) {
+                    QuizProfile.login(username, password);
+                    QuizUI.showRankingScreen();
+                } else {
+                    alert(result.error);
+                }
+            });
+
+            // --- Filtros de Ranking ---
+            Utils.$$('.quiz-filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    Utils.$$('.quiz-filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    QuizUI.renderRanking(btn.dataset.filter);
+                });
+            });
+
+            // --- Modo Práctica ---
+            initPracticeMode();
+
+            // --- Volver desde perfil ---
+            Utils.$('btn-back-ranking')?.addEventListener('click', () => {
+                QuizUI.showRankingScreen();
+            });
+
+            // --- Volver desde resultados ---
+            Utils.$('btn-back-home')?.addEventListener('click', () => {
+                QuizUI.showRankingScreen();
+            });
+        }
+
+        // ============================================
+        // JUEGO
+        // ============================================
+        function startGame(difficulty) {
+            // Modo weekly especial
+            if (difficulty === 'weekly') {
+                const questions = Storage.getQuizQuestions().filter(q => q.weekly);
+                if (questions.length === 0) {
+                    alert('Nenhuma pergunta semanal disponível');
+                    return;
+                }
+            }
+
+            const result = QuizGame.start({ 
+                difficulty: difficulty === 'weekly' ? 'avancado' : difficulty,
+                count: difficulty === 'weekly' ? 5 : 10
+            });
+            
+            if (!result.success) {
+                alert(result.error);
+                return;
+            }
+            
+            QuizUI.showScreen('screen-game');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const q = QuizGame.getCurrentQuestion();
+            if (!q) return;
+            
+            // Obtener pregunta original para acceder a imagen
+            const originalQ = QuizGame.state.questions[QuizGame.state.currentIndex];
+            const hasImage = originalQ?.image && originalQ.image.trim() !== '';
+            const timeLimit = q.timeLimit || 30;
+            
+            const container = Utils.$('game-content');
+            container.innerHTML = `
+                <div class="quiz-game-header">
+                    <span class="quiz-game-progress">Pergunta ${q.index} de ${q.total}</span>
+                    <div class="quiz-game-timer" id="game-timer">
+                        <i class="fas fa-clock"></i>
+                        <span id="timer-value">${timeLimit}</span>s
+                    </div>
+                </div>
+                ${hasImage ? `
+                    <div class="quiz-game-image">
+                        <img src="${originalQ.image}" alt="Imagem da pergunta">
+                    </div>
+                ` : ''}
+                <h3 class="quiz-game-question">
+                    ${Utils.escapeHtml(q.question)}
+                </h3>
+                <div class="quiz-game-options">
+                    ${q.options.map((opt, i) => `
+                        <button class="quiz-btn quiz-btn-secondary option-btn" data-index="${i}">
+                            ${Utils.escapeHtml(opt)}
+                        </button>
+                    `).join('')}
+                </div>
+                <div class="quiz-timer-bar">
+                    <div class="quiz-timer-fill" id="timer-bar" style="width: 100%;"></div>
+                </div>
+            `;
+            
+            // Eventos de opciones
+            container.querySelectorAll('.option-btn').forEach(btn => {
+                btn.addEventListener('click', () => handleAnswer(parseInt(btn.dataset.index)));
+            });
+            
+            // Iniciar timer con visualización
+            QuizGame.startTimer(
+                (timeLeft) => {
+                    // Actualizar contador
+                    const timerValue = document.getElementById('timer-value');
+                    const timerBar = document.getElementById('timer-bar');
+                    const timerDiv = document.getElementById('game-timer');
+                    
+                    if (timerValue) timerValue.textContent = timeLeft;
+                    if (timerBar) timerBar.style.width = `${(timeLeft / timeLimit) * 100}%`;
+                    
+                    // Cambiar color cuando queda poco tiempo
+                    if (timerDiv) {
+                        if (timeLeft <= 5) {
+                            timerDiv.classList.add('urgent');
+                            timerBar?.classList.add('urgent');
+                        } else if (timeLeft <= 10) {
+                            timerDiv.classList.add('warning');
+                            timerBar?.classList.add('warning');
+                        }
+                    }
+                },
+                () => handleAnswer(-1) // onTimeUp
+            );
+        }
+
+        function handleAnswer(optionIndex) {
+            const result = QuizGame.answer(optionIndex);
+            if (!result) return;
+            
+            // Obtener pregunta original para acceder a explicación
+            const originalQ = QuizGame.state.questions[QuizGame.state.currentIndex];
+            const hasExplanation = originalQ?.explanation && originalQ.explanation.trim() !== '';
+            
+            // Mostrar feedback
+            const container = Utils.$('game-content');
+            const btns = container.querySelectorAll('.option-btn');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === result.correctIndex) {
+                    btn.style.background = 'rgba(34, 197, 94, 0.3)';
+                    btn.style.borderColor = 'var(--success)';
+                } else if (i === optionIndex && !result.correct) {
+                    btn.style.background = 'rgba(239, 68, 68, 0.3)';
+                    btn.style.borderColor = 'var(--error)';
+                }
+            });
+            
+            // Mostrar explicación si existe
+            if (hasExplanation) {
+                const explanationDiv = document.createElement('div');
+                explanationDiv.style.cssText = 'margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 12px; border-left: 4px solid #3b82f6;';
+                explanationDiv.innerHTML = `
+                    <div style="color: #93c5fd; font-size: 12px; text-transform: uppercase; margin-bottom: 5px;">
+                        <i class="fas fa-lightbulb"></i> Explicação
+                    </div>
+                    <div style="color: white; font-size: 14px; line-height: 1.5;">
+                        ${Utils.escapeHtml(originalQ.explanation)}
+                    </div>
+                `;
+                container.appendChild(explanationDiv);
+            }
+            
+            // Siguiente pregunta después de delay (más tiempo si hay explicación)
+            const delay = hasExplanation ? 3000 : 1000;
+            setTimeout(() => {
+                const next = QuizGame.next();
+                if (next.finished) {
+                    showResults(next.result);
+                } else {
+                    showQuestion();
+                }
+            }, delay);
+        }
+
+        function showResults(result) {
+            QuizUI.showScreen('screen-results');
+            
+            const container = Utils.$('results-content');
+            container.innerHTML = `
+                <div style="color: white; text-align: center; margin: 20px 0;">
+                    <div style="font-size: 48px; font-weight: 800; color: #fbbf24; margin-bottom: 10px;">
+                        ${result.score} <span style="font-size: 18px; opacity: 0.7;">pts</span>
+                    </div>
+                    <div style="display: flex; justify-content: center; gap: 20px; font-size: 14px; opacity: 0.8;">
+                        <span><i class="fas fa-check" style="color: var(--success);"></i> ${result.correct}/${result.total}</span>
+                        <span><i class="fas fa-clock"></i> ${Utils.formatTime(result.time)}</span>
+                        <span><i class="fas fa-fire" style="color: #f59e0b;"></i> ${result.maxStreak}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // MODO PRÁCTICA
+        // ============================================
+        function initPracticeMode() {
+            // Usar Storage para obtener estado de práctica del usuario actual
+            const unlockedPractice = Storage.getPracticeStatus();
+            const hasAnyUnlocked = Object.values(unlockedPractice).some(v => v);
+
+            // Actualizar botón principal de práctica
+            const practiceBtn = Utils.$('btn-practice-mode');
+            const practiceStatus = Utils.$('practice-status');
+            const practiceLevels = Utils.$('practice-levels');
+            const practiceArrow = Utils.$('practice-arrow');
+
+            if (!practiceBtn) return;
+
+            if (hasAnyUnlocked) {
+                practiceStatus.textContent = 'Modo de estudo sem tempo nem pontos';
+                practiceBtn.classList.remove('disabled');
+                
+                // Toggle submenu
+                practiceBtn.onclick = () => {
+                    const isVisible = practiceLevels.style.display !== 'none';
+                    practiceLevels.style.display = isVisible ? 'none' : 'block';
+                    practiceArrow.style.transform = isVisible ? '' : 'rotate(90deg)';
+                };
+            } else {
+                practiceStatus.textContent = 'Jogue Campanha para desbloquear';
+                practiceBtn.classList.add('disabled');
+                practiceArrow.innerHTML = '<i class="fas fa-lock"></i>';
+            }
+
+            // Actualizar niveles individuales
+            ['facil', 'media', 'dificil'].forEach(diff => {
+                const levelEl = Utils.$(`practice-${diff}`);
+                if (!levelEl) return;
+
+                const isUnlocked = unlockedPractice[diff];
+                const statusEl = levelEl.querySelector('.level-status');
+
+                if (isUnlocked) {
+                    levelEl.classList.remove('locked');
+                    levelEl.classList.add('unlocked');
+                    statusEl.innerHTML = '<i class="fas fa-play"></i>';
+                    
+                    levelEl.onclick = () => startPractice(diff);
+                } else {
+                    levelEl.classList.add('locked');
+                    levelEl.classList.remove('unlocked');
+                    statusEl.innerHTML = '<i class="fas fa-lock"></i>';
+                    levelEl.onclick = null;
+                }
+            });
+        }
+
+        function startPractice(difficulty) {
+            // Verificar que está desbloqueado usando Storage
+            if (!Storage.isPracticeUnlocked(difficulty)) {
+                alert('Jogue Campanha na zona ' + getDifficultyZoneName(difficulty) + ' para desbloquear!');
+                return;
+            }
+
+            // Obtener preguntas
+            let questions = Storage.getQuizQuestions();
+            
+            if (questions.length === 0 && typeof QuizData !== 'undefined') {
+                questions = QuizData.exampleQuestions || [];
+            }
+
+            // Filtrar por dificultad
+            let filtered = questions.filter(q => q.diff === difficulty && q.active !== false);
+            if (filtered.length < 5) {
+                filtered = questions.filter(q => q.active !== false);
+            }
+
+            if (filtered.length === 0) {
+                alert('Não há perguntas disponíveis para prática!');
+                return;
+            }
+
+            // Iniciar juego en modo práctica (sin timer, sin puntos)
+            QuizUI.showScreen('screen-game');
+            startPracticeGame(filtered, difficulty);
+        }
+
+        function getDifficultyZoneName(diff) {
+            const names = { facil: 'Floresta (Fácil)', media: 'Planícies (Médio)', dificil: 'Montanhas (Difícil)' };
+            return names[diff] || diff;
+        }
+
+        function startPracticeGame(questions, difficulty) {
+            // Obtener config unificada
+            const quizConfig = typeof QuizRules !== 'undefined' ? QuizRules.getConfig() : 
+                              Storage.get('cartoesx_admin_config') || {};
+            
+            let prepared = [...questions];
+
+            // Shuffle de preguntas si está habilitado en config
+            if (quizConfig.shuffleQuestions !== false) {
+                for (let i = prepared.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [prepared[i], prepared[j]] = [prepared[j], prepared[i]];
+                }
+            }
+
+            // Tomar cantidad de preguntas según config
+            const questionsCount = quizConfig.questionsPerGame || 10;
+            prepared = prepared.slice(0, questionsCount);
+
+            // Shuffle de respuestas si está habilitado
+            if (quizConfig.shuffleAnswers !== false) {
+                prepared = prepared.map(q => {
+                    const answers = q.options.map((text, index) => ({
+                        text, originalIndex: index, isCorrect: index === q.correct
+                    }));
+                    // Fisher-Yates
+                    for (let i = answers.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [answers[i], answers[j]] = [answers[j], answers[i]];
+                    }
+                    return {
+                        ...q,
+                        options: answers.map(a => a.text),
+                        correct: answers.findIndex(a => a.isCorrect)
+                    };
+                });
+            }
+
+            // Estado de práctica
+            const practiceState = {
+                questions: prepared,
+                currentIndex: 0,
+                correct: 0,
+                wrong: 0,
+                difficulty: difficulty
+            };
+
+            showPracticeQuestion(practiceState);
+        }
+
+        function showPracticeQuestion(state) {
+            if (state.currentIndex >= state.questions.length) {
+                showPracticeResults(state);
+                return;
+            }
+
+            const q = state.questions[state.currentIndex];
+            const container = Utils.$('game-content');
+            const diffNames = { facil: 'Fácil', media: 'Médio', dificil: 'Difícil' };
+            const diffColors = { facil: '#22c55e', media: '#f59e0b', dificil: '#ef4444' };
+
+            container.innerHTML = `
+                <div class="quiz-game-header">
+                    <div class="quiz-game-progress">
+                        <span style="background:${diffColors[state.difficulty]};padding:4px 12px;border-radius:20px;font-size:12px;margin-right:10px;">
+                            📚 Prática ${diffNames[state.difficulty]}
+                        </span>
+                        Pergunta ${state.currentIndex + 1}/${state.questions.length}
+                    </div>
+                    <div style="font-size:13px;color:rgba(255,255,255,0.5);">
+                        <i class="fas fa-infinity"></i> Sem tempo
+                    </div>
+                </div>
+                
+                ${q.image ? `<img src="${q.image}" alt="" style="max-width:100%;max-height:180px;border-radius:12px;margin:15px auto;display:block;">` : ''}
+                
+                <div class="quiz-question">${q.question}</div>
+                
+                <div class="quiz-options">
+                    ${q.options.map((opt, i) => `
+                        <button class="option-btn practice-option" data-index="${i}">${opt}</button>
+                    `).join('')}
+                </div>
+                
+                <div style="text-align:center;margin-top:15px;color:rgba(255,255,255,0.5);font-size:12px;">
+                    ✓ ${state.correct} corretas | ✗ ${state.wrong} erradas
+                </div>
+            `;
+
+            container.querySelectorAll('.practice-option').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const selected = parseInt(btn.dataset.index);
+                    handlePracticeAnswer(state, selected, q.correct);
+                });
+            });
+        }
+
+        function handlePracticeAnswer(state, selected, correct) {
+            const container = Utils.$('game-content');
+            const btns = container.querySelectorAll('.practice-option');
+            
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === correct) {
+                    btn.style.background = 'rgba(34, 197, 94, 0.3)';
+                    btn.style.borderColor = '#22c55e';
+                } else if (i === selected && selected !== correct) {
+                    btn.style.background = 'rgba(239, 68, 68, 0.3)';
+                    btn.style.borderColor = '#ef4444';
+                }
+            });
+
+            if (selected === correct) {
+                state.correct++;
+            } else {
+                state.wrong++;
+            }
+
+            // Mostrar explicación si existe
+            const q = state.questions[state.currentIndex];
+            if (q.explanation) {
+                const expDiv = document.createElement('div');
+                expDiv.style.cssText = 'margin-top:15px;padding:12px;background:rgba(59,130,246,0.15);border-radius:10px;border-left:3px solid #3b82f6;';
+                expDiv.innerHTML = `<strong style="color:#93c5fd;font-size:12px;">💡 Explicação:</strong><br><span style="color:rgba(255,255,255,0.8);font-size:13px;">${q.explanation}</span>`;
+                container.querySelector('.quiz-options').after(expDiv);
+            }
+
+            // Botón siguiente
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'quiz-btn';
+            nextBtn.style.cssText = 'margin-top:20px;width:100%;';
+            nextBtn.innerHTML = state.currentIndex < state.questions.length - 1 
+                ? '<i class="fas fa-arrow-right"></i> Próxima' 
+                : '<i class="fas fa-flag-checkered"></i> Ver Resultado';
+            nextBtn.addEventListener('click', () => {
+                state.currentIndex++;
+                showPracticeQuestion(state);
+            });
+            container.appendChild(nextBtn);
+        }
+
+        function showPracticeResults(state) {
+            const accuracy = Math.round((state.correct / state.questions.length) * 100);
+            const container = Utils.$('game-content');
+            const diffNames = { facil: 'Fácil', media: 'Médio', dificil: 'Difícil' };
+
+            container.innerHTML = `
+                <div style="text-align:center;padding:30px 0;">
+                    <div style="font-size:60px;margin-bottom:20px;">📚</div>
+                    <h2 style="color:white;font-size:24px;margin-bottom:10px;">Prática Concluída!</h2>
+                    <p style="color:rgba(255,255,255,0.6);margin-bottom:25px;">Modo: ${diffNames[state.difficulty]}</p>
+                    
+                    <div style="display:flex;justify-content:center;gap:30px;margin-bottom:30px;">
+                        <div style="text-align:center;">
+                            <div style="font-size:36px;font-weight:800;color:#22c55e;">${state.correct}</div>
+                            <div style="font-size:12px;color:rgba(255,255,255,0.5);">Corretas</div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="font-size:36px;font-weight:800;color:#ef4444;">${state.wrong}</div>
+                            <div style="font-size:12px;color:rgba(255,255,255,0.5);">Erradas</div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="font-size:36px;font-weight:800;color:#3b82f6;">${accuracy}%</div>
+                            <div style="font-size:12px;color:rgba(255,255,255,0.5);">Precisão</div>
+                        </div>
+                    </div>
+                    
+                    <div style="background:rgba(255,255,255,0.05);padding:15px;border-radius:12px;margin-bottom:25px;">
+                        <p style="color:rgba(255,255,255,0.7);font-size:13px;">
+                            <i class="fas fa-info-circle" style="color:#3b82f6;"></i>
+                            Modo prática não dá pontos nem logros. Para ganhar recompensas, jogue a <strong>Campanha</strong>!
+                        </p>
+                    </div>
+                    
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                        <button class="quiz-btn quiz-btn-secondary" onclick="QuizUI.showRankingScreen()" style="flex:1;">
+                            <i class="fas fa-home"></i> Início
+                        </button>
+                        <button class="quiz-btn" onclick="startPractice('${state.difficulty}')" style="flex:1;">
+                            <i class="fas fa-redo"></i> Praticar Novamente
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
